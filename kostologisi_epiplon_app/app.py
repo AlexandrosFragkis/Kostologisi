@@ -8,7 +8,7 @@ import os
 material_prices = {
     "Καπλαμάς Δρυς": 210,
     "Λάκα": 120,
-    "Μελαμίνη": 90
+    "Μελαμίνη": 95
 }
 
 def extract_pdf_dimensions(file):
