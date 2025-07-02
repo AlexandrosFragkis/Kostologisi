@@ -12,7 +12,7 @@ st.set_page_config(layout="wide")
 
 # --- Προεπιλεγμένες Τιμές Υλικών για Κοστολόγηση ---
 def_material_prices = {
-    "Καπλαμάς": 130,
+    "Καπλαμάς Δρυς": 130,
     "Λάκα": 95,
     "Μελαμίνη": 60
 }
@@ -34,17 +34,36 @@ def_material_reference = {
     "Μελαμίνη": 60
 }
 
-# Εισαγωγή Τιμών Υλικών για Κοστολόγηση
-st.sidebar.header("Τιμές Υλικών Κοστολόγησης (€ / m²)")
-material_prices = {}
-for mat in def_material_prices:
-    material_prices[mat] = st.sidebar.number_input(f"{mat}", value=float(def_material_prices[mat]), min_value=0.0)
+# Χρήση session state για αποθήκευση τιμών
+if "material_prices" not in st.session_state:
+    st.session_state.material_prices = def_material_prices.copy()
+if "material_reference_prices" not in st.session_state:
+    st.session_state.material_reference_prices = def_material_reference.copy()
 
-# Επεξεργάσιμη Λίστα Τιμών Αναφοράς
-st.sidebar.header("Τιμές Αναφοράς Υλικών")
-material_reference_prices = {}
-for mat in def_material_reference:
-    material_reference_prices[mat] = st.sidebar.number_input(f"{mat} ", value=float(def_material_reference[mat]), min_value=0.0, key=f"ref_{mat}")
+# Layout με δύο στήλες
+col1, col2 = st.sidebar.columns(2)
+
+# Εισαγωγή Τιμών Υλικών για Κοστολόγηση (Αριστερά)
+with col1:
+    st.header("Τιμές Υλικών Κοστολόγησης (€ / m²)")
+    for mat in def_material_prices:
+        st.session_state.material_prices[mat] = st.number_input(
+            f"{mat}",
+            value=float(st.session_state.material_prices.get(mat, def_material_prices[mat])),
+            min_value=0.0,
+            key=f"price_{mat}"
+        )
+
+# Επεξεργάσιμη Λίστα Τιμών Αναφοράς (Δεξιά)
+with col2:
+    st.header("Τιμές Αναφοράς Υλικών")
+    for mat in def_material_reference:
+        st.session_state.material_reference_prices[mat] = st.number_input(
+            f"{mat}",
+            value=float(st.session_state.material_reference_prices.get(mat, def_material_reference[mat])),
+            min_value=0.0,
+            key=f"ref_{mat}"
+        )
 
 # --- Functions ---
 def extract_pdf_dimensions(file):
@@ -109,16 +128,16 @@ exterior_area = round((exterior_length * exterior_height) / 10000, 2)
 interior_area = round((interior_length * interior_height) / 10000, 2)
 
 st.header("3. Επιλογή Υλικών")
-exterior_material = st.selectbox("Υλικό εξωτερικά", options=list(material_prices.keys()))
-interior_material = st.selectbox("Υλικό εσωτερικά", options=list(material_prices.keys()))
+exterior_material = st.selectbox("Υλικό εξωτερικά", options=list(st.session_state.material_prices.keys()))
+interior_material = st.selectbox("Υλικό εσωτερικά", options=list(st.session_state.material_prices.keys()))
 
 st.header("4. Συρτάρια")
 drawer_count = st.number_input("Αριθμός συρταριών", min_value=0, step=1)
 drawer_price = 250
 
 if st.button("Υπολογισμός Κόστους"):
-    exterior_cost = exterior_area * material_prices[exterior_material]
-    interior_cost = interior_area * material_prices[interior_material]
+    exterior_cost = exterior_area * st.session_state.material_prices[exterior_material]
+    interior_cost = interior_area * st.session_state.material_prices[interior_material]
     drawers_cost = drawer_count * drawer_price
     total_cost = exterior_cost + interior_cost + drawers_cost
 
@@ -130,9 +149,10 @@ if st.button("Υπολογισμός Κόστους"):
     st.success(f"💰 Συνολικό Κόστος Κατασκευής: {total_cost:.2f} €")
 
     st.header("5. Επιπλέον Υπολογισμοί")
-    manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, max_value=1000000.0, step=100.0)
+    manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, step=10.0)
     commission_percent = st.number_input("Ποσοστό προμήθειας αρχιτέκτονα (%)", min_value=0.0, max_value=100.0, step=1.0)
     commission_amount = manual_cost * (commission_percent / 100)
     final_cost = manual_cost + commission_amount
+
     st.write(f"🔧 Προμήθεια ({commission_percent:.0f}%): {commission_amount:.2f} €")
     st.success(f"🏁 Τελικό Κόστος με Προμήθεια: {final_cost:.2f} €")
