@@ -84,7 +84,7 @@ with st.sidebar:
             value=float(st.session_state.material_reference_prices.get(mat, def_material_reference[mat])),
             min_value=0.0,
             key=f"ref_{mat}"
-        )
+        
 
     st.subheader("Ντουλάπα ανοιγόμενη από 1,6μ. εώς 4 συρτάρια (Εσωτερικά μελαμίνη)")
     for mat in def_material_reference:
