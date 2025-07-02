@@ -130,7 +130,7 @@ if st.button("Υπολογισμός Κόστους"):
     st.success(f"💰 Συνολικό Κόστος Κατασκευής: {total_cost:.2f} €")
 
     st.header("5. Επιπλέον Υπολογισμοί")
-    manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, step=10.0)
+    manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, step=1000000.0)
     commission_percent = st.number_input("Ποσοστό προμήθειας αρχιτέκτονα (%)", min_value=0.0, max_value=100.0, step=1.0)
     commission_amount = manual_cost * (commission_percent / 100)
     final_cost = manual_cost + commission_amount
