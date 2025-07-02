@@ -41,7 +41,7 @@ def_material_reference = {
     "Κόντρα Πλακέ Άβαφο": 80,
     "Μελαμίνη": 60,
     st.subheader ("Επιπλέον Υλικά")
-    "Duropal: 85,
+    "Duropal": 85,
     "Compact": 100,
     "Corian": 300,
     "Εξαρτήματα Επίπλων": 150
