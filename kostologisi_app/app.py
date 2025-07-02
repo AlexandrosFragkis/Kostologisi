@@ -93,7 +93,7 @@ with st.sidebar:
         st.session_state.material_prices = updated_prices
         save_prices(updated_prices)
 
-st.subheader("Τιμές Αναφοράς Υλικών")
+st.sidebar.header("Τιμές Αναφοράς Υλικών")
 
 # --- Ντουλάπα Ανοιγόμενη ---
 st.markdown("**Ντουλάπα ανοιγόμενη από 1,6μ. έως 4 συρτάρια (Εσωτερικά μελαμίνη)**")
