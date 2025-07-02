@@ -86,7 +86,7 @@ with st.sidebar:
             key=f"ref_{mat}"
         )
         
-st.subheader("Ντουλάπα ανοιγόμενη από 1,6μ. εώς 4 συρτάρια (Εσωτερικά μελαμίνη)")
+    st.subheader("Ντουλάπα ανοιγόμενη από 1,6μ. εώς 4 συρτάρια (Εσωτερικά μελαμίνη)")
     for mat in def_material_reference:
         st.session_state.material_reference_prices[mat] = st.number_input(
             f"{mat} (αναφορά)",
