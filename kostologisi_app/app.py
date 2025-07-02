@@ -77,7 +77,7 @@ with st.sidebar:
         save_prices(updated_prices)
 
     st.subheader("Τιμές Αναφοράς Υλικών")
-    st.subheader("Ντουλάπα από 1,6μ. εώς 4 συρτάρια")
+    st.subheader("Ντουλάπα από 1,6μ. εώς 4 συρτάρια (Εσωτερικά μελαμίνη)")
     for mat in def_material_reference:
         st.session_state.material_reference_prices[mat] = st.number_input(
             f"{mat} (αναφορά)",
