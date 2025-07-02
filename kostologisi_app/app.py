@@ -60,11 +60,11 @@ if "material_reference_prices" not in st.session_state:
 if "furniture_list" not in st.session_state:
     st.session_state.furniture_list = []
 
-# --- Δύο Στήλες στο κυρίως περιεχόμενο ---
+# --- Διάταξη: Τιμές Υλικών ---
 st.header("💵 Τιμές Υλικών")
-col_left, col_right = st.columns([2, 2])
+layout_left, layout_center, layout_right = st.columns([2, 3, 2])
 
-with col_left:
+with layout_left:
     st.subheader("Τιμές Υλικών Κοστολόγησης (€ / m²)")
     updated_prices = {}
     for mat in def_material_prices:
@@ -75,12 +75,11 @@ with col_left:
             key=f"price_{mat}"
         )
         updated_prices[mat] = new_val
-    # Αποθήκευση μετά από αλλαγές
     if updated_prices != st.session_state.material_prices:
         st.session_state.material_prices = updated_prices
         save_prices(updated_prices)
 
-with col_right:
+with layout_right:
     st.subheader("Τιμές Αναφοράς Υλικών")
     for mat in def_material_reference:
         st.session_state.material_reference_prices[mat] = st.number_input(
@@ -117,7 +116,7 @@ def extract_dxf_dimensions(file):
         total_area = 0.0
         for entity in msp:
             if entity.dxftype() == 'LWPOLYLINE' and entity.closed:
-                total_area += abs(entity.area) / 1_000_000  # mm² -> m²
+                total_area += abs(entity.area) / 1_000_000
 
         os.remove(tmp_path)
         return round(total_area, 2)
@@ -143,12 +142,12 @@ if uploaded_file:
 
 st.header("2. Εισαγωγή Διαστάσεων Κατασκευής (σε εκατοστά)")
 def_area_help = "Αν έχει ανέβει αρχείο, προτείνεται αυτόματα. Μπορείς να το τροποποιήσεις."
+st.text_input("Όνομα Κατασκευής", key="furniture_name")
 exterior_length = st.number_input("Μήκος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
 exterior_height = st.number_input("Ύψος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
 interior_length = st.number_input("Μήκος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
 interior_height = st.number_input("Ύψος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
 
-# Υπολογισμός επιφανειών σε m²
 exterior_area = round((exterior_length * exterior_height) / 10000, 2)
 interior_area = round((interior_length * interior_height) / 10000, 2)
 
@@ -160,7 +159,6 @@ st.header("4. Συρτάρια")
 drawer_count = st.number_input("Αριθμός συρταριών", min_value=0, step=1)
 drawer_price = 250
 
-# --- Νέο: Προσθήκη Επίπλου στη Λίστα ---
 if st.button("Προσθήκη Επίπλου"):
     exterior_cost = exterior_area * st.session_state.material_prices[exterior_material]
     interior_cost = interior_area * st.session_state.material_prices[interior_material]
@@ -168,6 +166,7 @@ if st.button("Προσθήκη Επίπλου"):
     total_cost = exterior_cost + interior_cost + drawers_cost
 
     st.session_state.furniture_list.append({
+        "όνομα": st.session_state.furniture_name,
         "εξωτερική επιφάνεια (m²)": exterior_area,
         "εσωτερική επιφάνεια (m²)": interior_area,
         "εξωτερικό υλικό": exterior_material,
@@ -180,7 +179,6 @@ if st.button("Προσθήκη Επίπλου"):
     })
     st.success("✅ Προστέθηκε έπιπλο στη λίστα")
 
-# --- Νέο: Προβολή Λίστας Επίπλων ---
 if st.session_state.furniture_list:
     st.subheader("📋 Λίστα Επίπλων")
     st.dataframe(st.session_state.furniture_list, use_container_width=True)
@@ -192,7 +190,6 @@ if st.session_state.furniture_list:
         st.session_state.furniture_list = []
         st.experimental_rerun()
 
-# --- Επιπλέον Υπολογισμοί ---
 st.header("5. Επιπλέον Υπολογισμοί")
 manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, step=10.0)
 commission_percent = st.number_input("Ποσοστό προμήθειας αρχιτέκτονα (%)", min_value=0.0, max_value=100.0, step=1.0)
