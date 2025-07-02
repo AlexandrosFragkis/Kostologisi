@@ -3,11 +3,11 @@ try:
 except ModuleNotFoundError:
     raise ImportError("Το Streamlit δεν είναι εγκατεστημένο. Εκτέλεσε 'pip install streamlit' για να συνεχίσεις.")
 
-import fitz  # PyMuPDF
-import ezdxf
-import tempfile
-import os
 import json
+import os
+import pandas as pd
+from io import BytesIO
+from docx import Document
 
 st.set_page_config(layout="wide")
 
@@ -16,9 +16,13 @@ PRICE_FILE = "material_prices.json"
 
 # --- Προεπιλεγμένες Τιμές Υλικών για Κοστολόγηση ---
 def_material_prices = {
-    "Καπλαμάς": 130,
+    "Καπλαμάς Δρυς": 130,
     "Λάκα": 95,
-    "Μελαμίνη": 60
+    "Μελαμίνη": 60,
+    "Duropal": 85,
+    "Compact": 100,
+    "Corian": 300,
+    "Εξαρτήματα Επίπλων": 150
 }
 
 # --- Σταθερή Λίστα Υλικών για Αναφορά ---
@@ -35,162 +39,137 @@ def_material_reference = {
     "MDF Άβαφο": 70,
     "Κόντρα Πλακέ Λάκα": 100,
     "Κόντρα Πλακέ Άβαφο": 80,
-    "Μελαμίνη": 60
+    "Μελαμίνη": 60,
+    "Duropal": 85,
+    "Compact": 100,
+    "Corian": 300,
+    "Εξαρτήματα Επίπλων": 150
 }
 
-# --- Φόρτωση αποθηκευμένων τιμών από αρχείο ---
+# --- Αποθήκευση / Φόρτωση ---
 def load_prices():
     if os.path.exists(PRICE_FILE):
         with open(PRICE_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     return def_material_prices.copy()
 
-# --- Αποθήκευση τιμών σε αρχείο ---
 def save_prices(prices):
     with open(PRICE_FILE, "w", encoding="utf-8") as f:
         json.dump(prices, f, ensure_ascii=False, indent=2)
 
-# --- Χρήση session state ---
 if "material_prices" not in st.session_state:
     st.session_state.material_prices = load_prices()
-
 if "material_reference_prices" not in st.session_state:
     st.session_state.material_reference_prices = def_material_reference.copy()
-
 if "furniture_list" not in st.session_state:
     st.session_state.furniture_list = []
 
-# --- Διάταξη: Τιμές Υλικών ---
-st.header("💵 Τιμές Υλικών")
-layout_left, layout_center, layout_right = st.columns([2, 3, 2])
-
-with layout_left:
-    st.subheader("Τιμές Υλικών Κοστολόγησης (€ / m²)")
+# --- Sidebar: Ρυθμίσεις Υλικών ---
+st.sidebar.header("🔧 Τιμές Υλικών")
+with st.sidebar:
+    st.subheader("Τιμές Υλικών Κοστολόγησης (€ / m² ή τεμ)")
     updated_prices = {}
     for mat in def_material_prices:
-        new_val = st.number_input(
-            f"{mat}",
-            value=float(st.session_state.material_prices.get(mat, def_material_prices[mat])),
-            min_value=0.0,
-            key=f"price_{mat}"
-        )
-        updated_prices[mat] = new_val
+        val = st.number_input(f"{mat}", value=float(st.session_state.material_prices.get(mat, def_material_prices[mat])), min_value=0.0, key=f"price_{mat}")
+        updated_prices[mat] = val
     if updated_prices != st.session_state.material_prices:
         st.session_state.material_prices = updated_prices
         save_prices(updated_prices)
 
-with layout_right:
     st.subheader("Τιμές Αναφοράς Υλικών")
     for mat in def_material_reference:
         st.session_state.material_reference_prices[mat] = st.number_input(
-            f"{mat}",
+            f"{mat} (αναφορά)",
             value=float(st.session_state.material_reference_prices.get(mat, def_material_reference[mat])),
             min_value=0.0,
             key=f"ref_{mat}"
         )
 
-# --- Functions ---
-def extract_pdf_dimensions(file):
-    try:
-        doc = fitz.open(stream=file.read(), filetype="pdf")
-        text = "\n".join([page.get_text() for page in doc])
-        import re
-        areas = re.findall(r"(\d+\.?\d*)\s*(?:m2|m²)", text)
-        if areas:
-            total_area = sum([float(a) for a in areas])
-            return total_area
-        return 0.0
-    except Exception as e:
-        st.error(f"Σφάλμα κατά την ανάγνωση PDF: {e}")
-        return 0.0
-
-def extract_dxf_dimensions(file):
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".dxf") as tmp:
-            tmp.write(file.read())
-            tmp_path = tmp.name
-
-        doc = ezdxf.readfile(tmp_path)
-        msp = doc.modelspace()
-
-        total_area = 0.0
-        for entity in msp:
-            if entity.dxftype() == 'LWPOLYLINE' and entity.closed:
-                total_area += abs(entity.area) / 1_000_000
-
-        os.remove(tmp_path)
-        return round(total_area, 2)
-    except Exception as e:
-        st.error(f"Σφάλμα κατά την ανάγνωση DXF: {e}")
-        return 0.0
-
-# --- Εφαρμογή ---
+# --- Κύριο Περιεχόμενο ---
 st.title("📐 Κοστολόγηση Custom Επίπλων")
 
-st.header("1. Ανέβασμα Αρχείων Σχεδίου (PDF ή CAD)")
-uploaded_file = st.file_uploader("Ανέβασε αρχείο PDF ή DXF", type=["pdf", "dxf"])
-
-auto_area = 0.0
-if uploaded_file:
-    file_ext = uploaded_file.name.split(".")[-1].lower()
-    if file_ext == "pdf":
-        auto_area = extract_pdf_dimensions(uploaded_file)
-    elif file_ext == "dxf":
-        auto_area = extract_dxf_dimensions(uploaded_file)
-
-    st.info(f"🔍 Εντοπίστηκε συνολική επιφάνεια από το σχέδιο: {auto_area:.2f} m²")
-
-st.header("2. Εισαγωγή Διαστάσεων Κατασκευής (σε εκατοστά)")
-def_area_help = "Αν έχει ανέβει αρχείο, προτείνεται αυτόματα. Μπορείς να το τροποποιήσεις."
-st.text_input("Όνομα Κατασκευής", key="furniture_name")
-exterior_length = st.number_input("Μήκος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
-exterior_height = st.number_input("Ύψος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
-interior_length = st.number_input("Μήκος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
-interior_height = st.number_input("Ύψος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0, help=def_area_help)
+st.header("1. Εισαγωγή Διαστάσεων Κατασκευής (σε εκατοστά)")
+construction_name = st.text_input("Όνομα Κατασκευής")
+exterior_length = st.number_input("Μήκος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
+exterior_height = st.number_input("Ύψος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
+interior_length = st.number_input("Μήκος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
+interior_height = st.number_input("Ύψος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
 
 exterior_area = round((exterior_length * exterior_height) / 10000, 2)
 interior_area = round((interior_length * interior_height) / 10000, 2)
 
-st.header("3. Επιλογή Υλικών")
-exterior_material = st.selectbox("Υλικό εξωτερικά", options=list(st.session_state.material_prices.keys()))
-interior_material = st.selectbox("Υλικό εσωτερικά", options=list(st.session_state.material_prices.keys()))
+st.header("2. Επιλογή Υλικών")
+material_keys = list(st.session_state.material_prices.keys())
+exterior_material = st.selectbox("Υλικό εξωτερικά", options=material_keys)
+interior_material = st.selectbox("Υλικό εσωτερικά", options=material_keys)
+panel_material = st.selectbox("Υλικό Πάγκου (κουζίνα/μπάνιο)", options=["Τίποτα", "Compact", "Corian", "Duropal"])
+add_hardware = st.selectbox("Προσθήκη Εξαρτημάτων Επίπλου", options=["ΟΧΙ", "ΝΑΙ"])
 
-st.header("4. Συρτάρια")
+st.header("3. Συρτάρια")
 drawer_count = st.number_input("Αριθμός συρταριών", min_value=0, step=1)
 drawer_price = 250
 
 if st.button("Προσθήκη Επίπλου"):
-    exterior_cost = exterior_area * st.session_state.material_prices[exterior_material]
-    interior_cost = interior_area * st.session_state.material_prices[interior_material]
+    prices = st.session_state.material_prices
+    exterior_cost = exterior_area * prices.get(exterior_material, 0)
+    interior_cost = interior_area * prices.get(interior_material, 0)
     drawers_cost = drawer_count * drawer_price
-    total_cost = exterior_cost + interior_cost + drawers_cost
+    panel_cost = 0 if panel_material == "Τίποτα" else prices.get(panel_material, 0)
+    hardware_cost = prices["Εξαρτήματα Επίπλων"] if add_hardware == "ΝΑΙ" else 0
+    total_cost = exterior_cost + interior_cost + drawers_cost + panel_cost + hardware_cost
 
     st.session_state.furniture_list.append({
-        "όνομα": st.session_state.furniture_name,
-        "εξωτερική επιφάνεια (m²)": exterior_area,
-        "εσωτερική επιφάνεια (m²)": interior_area,
-        "εξωτερικό υλικό": exterior_material,
-        "εσωτερικό υλικό": interior_material,
-        "συρτάρια": drawer_count,
-        "κόστος εξωτερικών": exterior_cost,
-        "κόστος εσωτερικών": interior_cost,
-        "κόστος συρταριών": drawers_cost,
-        "σύνολο": total_cost
+        "Κατασκευή": construction_name,
+        "Εξωτερική επιφάνεια (m²)": exterior_area,
+        "Εσωτερική επιφάνεια (m²)": interior_area,
+        "Εξωτερικό υλικό": exterior_material,
+        "Εσωτερικό υλικό": interior_material,
+        "Πάγκος": panel_material,
+        "Εξαρτήματα": add_hardware,
+        "Συρτάρια": drawer_count,
+        "Κόστος εξωτερικών": exterior_cost,
+        "Κόστος εσωτερικών": interior_cost,
+        "Κόστος συρταριών": drawers_cost,
+        "Κόστος πάγκου": panel_cost,
+        "Κόστος εξαρτημάτων": hardware_cost,
+        "Σύνολο": total_cost
     })
     st.success("✅ Προστέθηκε έπιπλο στη λίστα")
 
+# --- Προβολή Λίστας Επίπλων ---
 if st.session_state.furniture_list:
     st.subheader("📋 Λίστα Επίπλων")
-    st.dataframe(st.session_state.furniture_list, use_container_width=True)
+    df = pd.DataFrame(st.session_state.furniture_list)
+    st.dataframe(df, use_container_width=True)
 
-    total = sum(item["σύνολο"] for item in st.session_state.furniture_list)
+    total = df["Σύνολο"].sum()
     st.success(f"💰 Συνολικό Κόστος Όλων των Επίπλων: {total:.2f} €")
 
     if st.button("Επαναφορά Λίστας"):
         st.session_state.furniture_list = []
-        st.experimental_rerun()
+        st.rerun()
 
-st.header("5. Επιπλέον Υπολογισμοί")
+    # --- Εξαγωγή σε Word ---
+    doc = Document()
+    doc.add_heading("Λίστα Επίπλων", level=1)
+    for item in st.session_state.furniture_list:
+        for k, v in item.items():
+            doc.add_paragraph(f"{k}: {v}")
+        doc.add_paragraph("---")
+
+    word_buffer = BytesIO()
+    doc.save(word_buffer)
+    word_buffer.seek(0)
+
+    st.download_button(
+        label="📥 Λήψη Λίστας σε Word",
+        data=word_buffer,
+        file_name="lista_epiplon.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
+# --- Επιπλέον Υπολογισμοί ---
+st.header("4. Επιπλέον Υπολογισμοί")
 manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, step=10.0)
 commission_percent = st.number_input("Ποσοστό προμήθειας αρχιτέκτονα (%)", min_value=0.0, max_value=100.0, step=1.0)
 commission_amount = manual_cost * (commission_percent / 100)
