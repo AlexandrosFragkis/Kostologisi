@@ -7,8 +7,12 @@ import fitz  # PyMuPDF
 import ezdxf
 import tempfile
 import os
+import json
 
 st.set_page_config(layout="wide")
+
+# --- Αρχεία για αποθήκευση τιμών ---
+PRICE_FILE = "material_prices.json"
 
 # --- Προεπιλεγμένες Τιμές Υλικών για Κοστολόγηση ---
 def_material_prices = {
@@ -34,29 +38,50 @@ def_material_reference = {
     "Μελαμίνη": 60
 }
 
-# Χρήση session state για αποθήκευση τιμών
+# --- Φόρτωση αποθηκευμένων τιμών από αρχείο ---
+def load_prices():
+    if os.path.exists(PRICE_FILE):
+        with open(PRICE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return def_material_prices.copy()
+
+# --- Αποθήκευση τιμών σε αρχείο ---
+def save_prices(prices):
+    with open(PRICE_FILE, "w", encoding="utf-8") as f:
+        json.dump(prices, f, ensure_ascii=False, indent=2)
+
+# --- Χρήση session state ---
 if "material_prices" not in st.session_state:
-    st.session_state.material_prices = def_material_prices.copy()
+    st.session_state.material_prices = load_prices()
+
 if "material_reference_prices" not in st.session_state:
     st.session_state.material_reference_prices = def_material_reference.copy()
 
-# Layout με δύο στήλες
-col1, col2 = st.sidebar.columns(2)
+if "furniture_list" not in st.session_state:
+    st.session_state.furniture_list = []
 
-# Εισαγωγή Τιμών Υλικών για Κοστολόγηση (Αριστερά)
-with col1:
-    st.header("Τιμές Υλικών Κοστολόγησης (€ / m²)")
+# --- Δύο Στήλες στο κυρίως περιεχόμενο ---
+st.header("💵 Τιμές Υλικών")
+col_left, col_right = st.columns([2, 2])
+
+with col_left:
+    st.subheader("Τιμές Υλικών Κοστολόγησης (€ / m²)")
+    updated_prices = {}
     for mat in def_material_prices:
-        st.session_state.material_prices[mat] = st.number_input(
+        new_val = st.number_input(
             f"{mat}",
             value=float(st.session_state.material_prices.get(mat, def_material_prices[mat])),
             min_value=0.0,
             key=f"price_{mat}"
         )
+        updated_prices[mat] = new_val
+    # Αποθήκευση μετά από αλλαγές
+    if updated_prices != st.session_state.material_prices:
+        st.session_state.material_prices = updated_prices
+        save_prices(updated_prices)
 
-# Επεξεργάσιμη Λίστα Τιμών Αναφοράς (Δεξιά)
-with col2:
-    st.header("Τιμές Αναφοράς Υλικών")
+with col_right:
+    st.subheader("Τιμές Αναφοράς Υλικών")
     for mat in def_material_reference:
         st.session_state.material_reference_prices[mat] = st.number_input(
             f"{mat}",
@@ -135,24 +160,45 @@ st.header("4. Συρτάρια")
 drawer_count = st.number_input("Αριθμός συρταριών", min_value=0, step=1)
 drawer_price = 250
 
-if st.button("Υπολογισμός Κόστους"):
+# --- Νέο: Προσθήκη Επίπλου στη Λίστα ---
+if st.button("Προσθήκη Επίπλου"):
     exterior_cost = exterior_area * st.session_state.material_prices[exterior_material]
     interior_cost = interior_area * st.session_state.material_prices[interior_material]
     drawers_cost = drawer_count * drawer_price
     total_cost = exterior_cost + interior_cost + drawers_cost
 
-    st.subheader("Ανάλυση Κόστους")
-    st.write(f"✅ Κόστος εξωτερικών υλικών: {exterior_cost:.2f} € (επιφάνεια: {exterior_area} m²)")
-    st.write(f"✅ Κόστος εσωτερικών υλικών: {interior_cost:.2f} € (επιφάνεια: {interior_area} m²)")
-    st.write(f"✅ Κόστος συρταριών ({drawer_count} × 250€): {drawers_cost:.2f} €")
-    st.markdown("---")
-    st.success(f"💰 Συνολικό Κόστος Κατασκευής: {total_cost:.2f} €")
+    st.session_state.furniture_list.append({
+        "εξωτερική επιφάνεια (m²)": exterior_area,
+        "εσωτερική επιφάνεια (m²)": interior_area,
+        "εξωτερικό υλικό": exterior_material,
+        "εσωτερικό υλικό": interior_material,
+        "συρτάρια": drawer_count,
+        "κόστος εξωτερικών": exterior_cost,
+        "κόστος εσωτερικών": interior_cost,
+        "κόστος συρταριών": drawers_cost,
+        "σύνολο": total_cost
+    })
+    st.success("✅ Προστέθηκε έπιπλο στη λίστα")
 
-    st.header("5. Επιπλέον Υπολογισμοί")
-    manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, step=10.0)
-    commission_percent = st.number_input("Ποσοστό προμήθειας αρχιτέκτονα (%)", min_value=0.0, max_value=100.0, step=1.0)
-    commission_amount = manual_cost * (commission_percent / 100)
-    final_cost = manual_cost + commission_amount
+# --- Νέο: Προβολή Λίστας Επίπλων ---
+if st.session_state.furniture_list:
+    st.subheader("📋 Λίστα Επίπλων")
+    st.dataframe(st.session_state.furniture_list, use_container_width=True)
 
-    st.write(f"🔧 Προμήθεια ({commission_percent:.0f}%): {commission_amount:.2f} €")
+    total = sum(item["σύνολο"] for item in st.session_state.furniture_list)
+    st.success(f"💰 Συνολικό Κόστος Όλων των Επίπλων: {total:.2f} €")
+
+    if st.button("Επαναφορά Λίστας"):
+        st.session_state.furniture_list = []
+        st.experimental_rerun()
+
+# --- Επιπλέον Υπολογισμοί ---
+st.header("5. Επιπλέον Υπολογισμοί")
+manual_cost = st.number_input("Χειροκίνητο συνολικό κόστος κατασκευής (€)", min_value=0.0, step=10.0)
+commission_percent = st.number_input("Ποσοστό προμήθειας αρχιτέκτονα (%)", min_value=0.0, max_value=100.0, step=1.0)
+commission_amount = manual_cost * (commission_percent / 100)
+final_cost = manual_cost + commission_amount
+
+st.write(f"🔧 Προμήθεια ({commission_percent:.0f}%): {commission_amount:.2f} €")
+if manual_cost > 0:
     st.success(f"🏁 Τελικό Κόστος με Προμήθεια: {final_cost:.2f} €")
