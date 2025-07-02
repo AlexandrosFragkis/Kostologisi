@@ -44,7 +44,7 @@ for mat in def_material_prices:
 st.sidebar.header("Τιμές Αναφοράς Υλικών")
 material_reference_prices = {}
 for mat in def_material_reference:
-    material_reference_prices[mat] = st.sidebar.number_input(f"{mat} ", value=def_material_reference[mat], min_value=0.0, key=f"ref_{mat}")
+    material_prices[mat] = st.sidebar.number_input(f"{mat}", value=float(def_material_prices[mat]), min_value=0.0)
 
 # --- Functions ---
 def extract_pdf_dimensions(file):
