@@ -51,7 +51,7 @@ def extract_pdf_dimensions(file):
     try:
         doc = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
-.join([page.get_text() for page in doc])
+join ([page.get_text() for page in doc])
         import re
         areas = re.findall(r"(\d+\.?\d*)\s*(?:m2|m²)", text)
         if areas:
