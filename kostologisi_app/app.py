@@ -38,7 +38,7 @@ def_material_reference = {
 st.sidebar.header("Τιμές Υλικών Κοστολόγησης (€ / m²)")
 material_prices = {}
 for mat in def_material_prices:
-    material_prices[mat] = st.sidebar.number_input(f"{mat}", value=float_material_prices[mat], min_value=0.0)
+    material_prices[mat] = st.sidebar.number_input(f"{mat}", value=float(def_material_prices[mat]), min_value=0.0)
 
 # Επεξεργάσιμη Λίστα Τιμών Αναφοράς
 st.sidebar.header("Τιμές Αναφοράς Υλικών")
