@@ -120,6 +120,15 @@ with st.sidebar:
             key=f"ref_slide_{mat}"
         )
 
+     st.subheader("Κουζίνα κάτω/πάνω ντουλάπια (Εσωτερικά μελαμίνη)")
+     for mat in def_material_reference:
+         st.session_state.material_reference_prices[f"{mat} (κουζίνα)"] = st.number_input(
+             f"{mat} (κουζίνα)",
+             value=float(st.session_state.material_reference_prices.get(f"{mat} (κουζίνα)", def_material_reference[mat])),
+             min_value=0.0,
+             key=f"ref_kitchen_{mat}"
+       )
+
 # --- Κύριο Περιεχόμενο ---
 st.title("📐 Κοστολόγηση Custom Επίπλων")
 
