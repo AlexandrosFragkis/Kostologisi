@@ -90,10 +90,8 @@ st.title("📐 Κοστολόγηση Custom Επίπλων")
 
 st.header("1. Εισαγωγή Διαστάσεων Κατασκευής (σε εκατοστά)")
 construction_name = st.text_input("Όνομα Κατασκευής")
-exterior_length = st.number_input("Μήκος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
-exterior_height = st.number_input("Ύψος εξωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
-interior_length = st.number_input("Μήκος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
-interior_height = st.number_input("Ύψος εσωτερικής επιφάνειας (cm)", min_value=0.0, step=1.0)
+exterior_length = st.number_input("Μήκος κατασκευής (cm)", min_value=0.0, step=1.0)
+exterior_height = st.number_input("Ύψος κατασκευής (cm)", min_value=0.0, step=1.0)
 
 exterior_area = round((exterior_length * exterior_height) / 10000, 2)
 interior_area = round((interior_length * interior_height) / 10000, 2)
