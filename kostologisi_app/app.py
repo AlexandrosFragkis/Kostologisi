@@ -40,12 +40,16 @@ def_material_reference = {
     "Κόντρα Πλακέ Λάκα": 100,
     "Κόντρα Πλακέ Άβαφο": 80,
     "Μελαμίνη": 60,
-    "Duropal": 85,
+}
+
+# --- Σταθερή Λίστα Υλικών για Αναφορά ---
+def_material_reference2 = {
+  "Duropal": 85,
     "Compact": 100,
     "Corian": 300,
     "Εξαρτήματα Επίπλων": 150
 }
-
+    
 # --- Αποθήκευση / Φόρτωση ---
 def load_prices():
     if os.path.exists(PRICE_FILE):
