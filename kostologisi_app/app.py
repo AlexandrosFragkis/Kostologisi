@@ -94,9 +94,7 @@ with st.sidebar:
         save_prices(updated_prices)
 
 st.sidebar.header("Τιμές Αναφοράς Υλικών")
-
-# --- Ντουλάπα Ανοιγόμενη ---
-st.markdown("**Ντουλάπα ανοιγόμενη από 1,6μ. έως 4 συρτάρια (Εσωτερικά μελαμίνη)**")
+st.subheader("**Ντουλάπα ανοιγόμενη από 1,6μ. έως 4 συρτάρια (Εσωτερικά μελαμίνη)**")
 for mat in def_material_reference:
     st.session_state.material_reference_prices[mat] = st.number_input(
         f"{mat} (ανοιγόμενη)",
@@ -105,8 +103,7 @@ for mat in def_material_reference:
         key=f"ref_open_{mat}"
     )
 
-# --- Ντουλάπα Συρόμενη ---
-st.markdown("**Ντουλάπα συρόμενη από 1,6μ. έως 4 συρτάρια (Εσωτερικά μελαμίνη)**")
+st.subheader("**Ντουλάπα συρόμενη από 1,6μ. έως 4 συρτάρια (Εσωτερικά μελαμίνη)**")
 for mat in def_material_reference:
     st.session_state.material_reference_prices[f"{mat} (συρόμενη)"] = st.number_input(
         f"{mat} (συρόμενη)",
@@ -115,8 +112,7 @@ for mat in def_material_reference:
         key=f"ref_slide_{mat}"
     )
 
-# --- Κουζίνα ---
-st.markdown("**Κουζίνα κάτω/πάνω ντουλάπια (Εσωτερικά μελαμίνη)**")
+st.subheader("**Κουζίνα (Εσωτερικά μελαμίνη)**")
 for mat in def_material_reference:
     st.session_state.material_reference_prices[f"{mat} (κουζίνα)"] = st.number_input(
         f"{mat} (κουζίνα)",
