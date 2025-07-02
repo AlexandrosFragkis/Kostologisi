@@ -120,7 +120,7 @@ with st.sidebar:
             key=f"ref_slide_{mat}"
         )
 
-     st.subheader("Κουζίνα κάτω/πάνω ντουλάπια (Εσωτερικά μελαμίνη)")
+     st.subheader("Κουζίνα (Εσωτερικά μελαμίνη)")
      for mat in def_material_reference:
          st.session_state.material_reference_prices[f"{mat} (κουζίνα)"] = st.number_input(
              f"{mat} (κουζίνα)",
