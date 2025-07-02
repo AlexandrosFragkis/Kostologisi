@@ -50,7 +50,6 @@ st.title("📐 Κοστολόγηση Custom Επίπλων")
 
 st.header("1. Ανέβασμα Αρχείων Σχεδίου (PDF ή CAD)")
 uploaded_file = st.file_uploader("Ανέβασε αρχείο PDF ή DXF", type=["pdf", "dxf"])
-
 auto_area = 0.0
 if uploaded_file:
     file_ext = uploaded_file.name.split(".")[-1].lower()
