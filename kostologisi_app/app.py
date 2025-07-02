@@ -92,35 +92,16 @@ with st.sidebar:
     if updated_prices != st.session_state.material_prices:
         st.session_state.material_prices = updated_prices
         save_prices(updated_prices)
-
-st.sidebar.header("Τιμές Αναφοράς Υλικών")
-st.subheader("**Ντουλάπα ανοιγόμενη από 1,6μ. έως 4 συρτάρια (Εσωτερικά μελαμίνη)**")
-for mat in def_material_reference:
-    st.session_state.material_reference_prices[mat] = st.number_input(
-        f"{mat} (ανοιγόμενη)",
-        value=float(st.session_state.material_reference_prices.get(mat, def_material_reference[mat])),
-        min_value=0.0,
-        key=f"ref_open_{mat}"
-    )
-
-st.subheader("**Ντουλάπα συρόμενη από 1,6μ. έως 4 συρτάρια (Εσωτερικά μελαμίνη)**")
-for mat in def_material_reference:
-    st.session_state.material_reference_prices[f"{mat} (συρόμενη)"] = st.number_input(
-        f"{mat} (συρόμενη)",
-        value=float(st.session_state.material_reference_prices.get(f"{mat} (συρόμενη)", def_material_reference[mat])),
-        min_value=0.0,
-        key=f"ref_slide_{mat}"
-    )
-
-st.subheader("**Κουζίνα (Εσωτερικά μελαμίνη)**")
-for mat in def_material_reference:
-    st.session_state.material_reference_prices[f"{mat} (κουζίνα)"] = st.number_input(
-        f"{mat} (κουζίνα)",
-        value=float(st.session_state.material_reference_prices.get(f"{mat} (κουζίνα)", def_material_reference[mat])),
-        min_value=0.0,
-        key=f"ref_kitchen_{mat}"
-    )
         
+    st.subheader("Τιμές Αναφοράς Υλικών")
+    for mat in def_material_reference:
+        st.session_state.material_reference_prices[mat] = st.number_input(
+            f"{mat} (αναφορά)",
+            value=float(st.session_state.material_reference_prices.get(mat, def_material_reference[mat])),
+            min_value=0.0,
+            key=f"ref_{mat}"
+        )
+
 # --- Κύριο Περιεχόμενο ---
 st.title("📐 Κοστολόγηση Custom Επίπλων")
 
