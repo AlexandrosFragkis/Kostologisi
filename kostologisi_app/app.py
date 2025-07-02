@@ -7,7 +7,7 @@ import json
 import os
 import pandas as pd
 from io import BytesIO
-from doc import Document
+from docx import Document
 
 st.set_page_config(layout="wide")
 
