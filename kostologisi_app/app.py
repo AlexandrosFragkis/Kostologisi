@@ -26,8 +26,6 @@ def_material_prices = {
 }
 
 # --- Σταθερή Λίστα Υλικών για Αναφορά ---
-
-# --- Ντουλάπα από 1,6 εώς 4 συρτάρια ---
 def_material_reference = {
     "Καπλαμάς Δρυς": 130,
     "Καπλαμάς Δρυς με ταμπλά": 140,
@@ -79,6 +77,7 @@ with st.sidebar:
         save_prices(updated_prices)
 
     st.subheader("Τιμές Αναφοράς Υλικών")
+    st.subheader("Ντουλάπα από 1,6μ. εώς 4 συρτάρια")
     for mat in def_material_reference:
         st.session_state.material_reference_prices[mat] = st.number_input(
             f"{mat} (αναφορά)",
