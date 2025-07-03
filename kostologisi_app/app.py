@@ -27,10 +27,10 @@ def_material_prices = {
 
 # --- Σταθερή Λίστα Υλικών για Αναφορά ---
 def_material_reference = {
-    "Ντουλ. Μελαμίνη/Μελαμίνη": 130,
-    "Ντουλ. Λάκα/Μελαμίνη": 140,
-    "Ντουλ. Καπλαμάς δρυς/Μελαμίνη": 145,
-    "Ντουλ. Καπλαμάς Καρυδιά/Μελαμίνη": 135,
+    "Καπλαμάς Δρυς": 130,
+    "Καπλαμάς Δρυς με ταμπλά": 140,
+    "Καπλαμάς Δρυς με πηχάκια": 145,
+    "Καπλαμάς Καρυδιά": 135,
     "Καπλαμάς Καρυδιά με ταμπλά": 145,
     "Καπλαμάς Καρυδιά με πηχάκια": 150,
     "MDF Λάκα": 95,
@@ -39,11 +39,11 @@ def_material_reference = {
     "MDF Άβαφο": 70,
     "Κόντρα Πλακέ Λάκα": 100,
     "Κόντρα Πλακέ Άβαφο": 80,
+    "Μελαμίνη": 60,
     "Duropal": 85,
     "Compact": 100,
     "Corian": 300,
     "Εξαρτήματα Επίπλων": 150
-    
 }
 
 # --- Αποθήκευση / Φόρτωση ---
@@ -75,7 +75,7 @@ with st.sidebar:
     if updated_prices != st.session_state.material_prices:
         st.session_state.material_prices = updated_prices
         save_prices(updated_prices)
-        
+
     st.subheader("Τιμές Αναφοράς Υλικών")
     for mat in def_material_reference:
         st.session_state.material_reference_prices[mat] = st.number_input(
