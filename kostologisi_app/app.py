@@ -10,7 +10,47 @@ from io import BytesIO
 from docx import Document
 from PIL import Image
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Κοστολόγηση Επίπλων", page_icon="📐")
+
+# --- Custom CSS για χρώματα ---
+st.markdown("""
+    <style>
+        .main {
+            background-color: #f7f9fc;
+        }
+        .stApp {
+            background-image: linear-gradient(90deg, #1f2a44 0%, #5a1a2d 100%);
+            color: white;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff;
+        }
+        .stButton>button {
+            background-color: #5a1a2d;
+            color: white;
+            border-radius: 10px;
+        }
+        .stButton>button:hover {
+            background-color: #871d39;
+            color: white;
+        }
+        .stNumberInput input {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .stSelectbox>div>div>div {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .stTextInput input {
+            background-color: #ffffff;
+            color: #000000;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- Αρχεία για αποθήκευση τιμών ---
+PRICE_FILE = "material_prices.json"
 
 # --- Προεπιλεγμένες Τιμές Υλικών για Κοστολόγηση ---
 def_material_prices = {
