@@ -12,39 +12,61 @@ from PIL import Image
 
 st.set_page_config(layout="wide", page_title="Κοστολόγηση Επίπλων", page_icon="📐")
 
-# --- Custom CSS για χρώματα ---
+# --- Custom CSS με αισθητική από masterwood.gr ---
 st.markdown("""
     <style>
-        .main {
-            background-color: #f7f9fc;
-        }
         .stApp {
-            background-image: linear-gradient(90deg, #1f2a44 0%, #5a1a2d 100%);
-            color: white;
+            background-color: #f8f6f3;
+            background-image: linear-gradient(to bottom, #1e2022, #3b1c1f);
+            color: #fdfdfd;
+            font-family: 'Segoe UI', sans-serif;
         }
+
         h1, h2, h3, h4, h5, h6 {
-            color: #ffffff;
+            color: #f5f1ee;
         }
-        .stButton>button {
-            background-color: #5a1a2d;
-            color: white;
-            border-radius: 10px;
+
+        .stSidebar {
+            background-color: #2d2d2d;
         }
-        .stButton>button:hover {
-            background-color: #871d39;
-            color: white;
+
+        .stNumberInput input, .stTextInput input {
+            background-color: #fff;
+            color: #000;
+            border-radius: 6px;
+            padding: 0.25rem;
         }
-        .stNumberInput input {
-            background-color: #ffffff;
-            color: #000000;
-        }
+
         .stSelectbox>div>div>div {
-            background-color: #ffffff;
-            color: #000000;
+            background-color: #fff;
+            color: #000;
+            border-radius: 6px;
         }
-        .stTextInput input {
-            background-color: #ffffff;
-            color: #000000;
+
+        .stButton>button {
+            background-color: #8a1c1c;
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 0.5rem 1.5rem;
+            transition: 0.3s;
+        }
+
+        .stButton>button:hover {
+            background-color: #aa2e2e;
+            transform: scale(1.03);
+        }
+
+        .block-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .css-1d391kg {
+            padding: 2rem;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
     </style>
 """, unsafe_allow_html=True)
