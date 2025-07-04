@@ -12,10 +12,6 @@ from PIL import Image
 
 st.set_page_config(layout="wide")
 
-# --- Εισαγωγή Logo ---
-logo = Image.open("logo_colours_2.jpg")
-st.image(logo, width=250)
-
 # --- Αρχεία για αποθήκευση τιμών ---
 PRICE_FILE = "material_prices.json"
 
