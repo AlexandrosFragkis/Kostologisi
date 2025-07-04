@@ -210,7 +210,7 @@ add_hardware = st.selectbox("Προσθήκη Εξαρτημάτων Επίπλ�
 
 st.header("3. Συρτάρια")
 drawer_count = st.number_input("Διαφορά από 4 συρτάρια (θετικός ή αρνητικός αριθμός)", value=0, step=1)
-drawer_price = 250
+drawer_price = 100
 
 total_drawers_cost = drawer_count * drawer_price
 
