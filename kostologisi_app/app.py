@@ -17,7 +17,10 @@ st.markdown("""
     <style>
         .stApp {
             background-color: #f8f6f3;
-            background-image: linear-gradient(to bottom, #1e2022, #3b1c1f);
+            background-image: url('https://www.masterwood.gr/wp-content/uploads/2020/11/logo_white.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: top right;
             color: #fdfdfd;
             font-family: 'Segoe UI', sans-serif;
         }
