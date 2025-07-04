@@ -8,8 +8,13 @@ import os
 import pandas as pd
 from io import BytesIO
 from docx import Document
+from PIL import Image
 
 st.set_page_config(layout="wide")
+
+# --- Εισαγωγή Logo ---
+logo = Image.open("logo_colours 2.jpg")
+st.image(logo, width=250)
 
 # --- Αρχεία για αποθήκευση τιμών ---
 PRICE_FILE = "material_prices.json"
@@ -27,7 +32,7 @@ def_material_prices = {
 
 # --- Τιμές Αναφοράς Επίπλων ---
 def_furniture_reference = {
-    "Ντουλάπα ανοιγόμενη από 1,60 εώς 4 συρτάρια (Εσωτερικά Μελαμίνη)": {
+    "Ντουλάπα ανοιγόμενη": {
         "Μελαμίνη": 320,
         "Λάκα ματ/σατινέ": 400,
         "Λάκα ζαγρέ": 430,
@@ -41,7 +46,7 @@ def_furniture_reference = {
         "Καπλαμάς καρυδιά με πηχάκια": 550,
         "Τζάμι με μεταλλικό πλαίσιο": 550
     },
-    "Ντουλάπα συρόμενη από 1,60 εώς 4 συρτάρια (Εσωτερικά Μελαμίνη)": {
+    "Ντουλάπα συρόμενη": {
         "Μελαμίνη": 400,
         "Λάκα ματ/σατινέ": 480,
         "Λάκα ζαγρέ": 520,
@@ -50,7 +55,7 @@ def_furniture_reference = {
         "Με καθρέπτη": 480,
         "Τζάμι με μεταλλικό πλαίσιο": 580
     },
-    "Ντουλάπα ανοιγόμενη με ταπετσαρία από 1,60 εώς 4 συρτάρια (Εσωτερικά Μελαμίνη)": {
+    "Ντουλάπα ανοιγόμενη με ταπετσαρία": {
         "Λάκα ματ/σατινέ": 600,
         "Καπλαμάς δρυς": 600,
         "Καπλαμάς καρυδιά": 700
@@ -149,8 +154,10 @@ panel_material = st.selectbox("Υλικό Πάγκου (κουζίνα/μπάν�
 add_hardware = st.selectbox("Προσθήκη Εξαρτημάτων Επίπλου", options=["ΟΧΙ", "ΝΑΙ"])
 
 st.header("3. Συρτάρια")
-drawer_count = st.number_input("Αριθμός συρταριών", min_value=0, step=1)
-drawer_price = 100
+drawer_count = st.number_input("Διαφορά από 4 συρτάρια (θετικός ή αρνητικός αριθμός)", value=0, step=1)
+drawer_price = 250
+
+total_drawers_cost = drawer_count * drawer_price
 
 if st.button("Προσθήκη Επίπλου"):
     section, mat = selected_material.split(" - ", 1)
@@ -158,8 +165,7 @@ if st.button("Προσθήκη Επίπλου"):
     total_material_cost = exterior_area * price_per_m2
     panel_cost = 0 if panel_material == "Τίποτα" else st.session_state.material_prices.get(panel_material, 0)
     hardware_cost = st.session_state.material_prices["Εξαρτήματα Επίπλων"] if add_hardware == "ΝΑΙ" else 0
-    drawers_cost = drawer_count * drawer_price
-    total_cost = total_material_cost + panel_cost + hardware_cost + drawers_cost
+    total_cost = total_material_cost + panel_cost + hardware_cost + total_drawers_cost
 
     st.session_state.furniture_list.append({
         "Κατασκευή": construction_name,
@@ -167,11 +173,11 @@ if st.button("Προσθήκη Επίπλου"):
         "Κατηγορία/Υλικό": selected_material,
         "Πάγκος": panel_material,
         "Εξαρτήματα": add_hardware,
-        "Συρτάρια": drawer_count,
+        "Διαφορά Συρταριών": drawer_count,
         "Κόστος Υλικού": total_material_cost,
         "Κόστος Πάγκου": panel_cost,
         "Κόστος Εξαρτημάτων": hardware_cost,
-        "Κόστος Συρταριών": drawers_cost,
+        "Κόστος Συρταριών": total_drawers_cost,
         "Σύνολο": total_cost
     })
     st.success("✅ Προστέθηκε έπιπλο στη λίστα")
