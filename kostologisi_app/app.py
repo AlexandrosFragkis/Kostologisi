@@ -13,22 +13,6 @@ import base64
 
 st.set_page_config(layout="wide", page_title="Κοστολόγηση Επίπλων", page_icon="📐")
 
-# --- Εισαγωγή Logo από ενσωματωμένο αρχείο ή fallback ---
-if os.path.exists("logo.jpg"):
-    logo = Image.open("logo.jpg")
-    st.image(logo, width=250)
-else:
-    uploaded_logo = st.file_uploader("Ανέβασε το λογότυπο (jpg/png)", type=["jpg", "png"])
-    if uploaded_logo:
-        logo = Image.open(uploaded_logo)
-        st.image(logo, width=250)
-    else:
-        st.markdown("""
-        <div style='text-align: center; padding: 10px; background-color: #f9f9f9; border: 1px dashed #ccc; border-radius: 10px;'>
-            <strong style='color: #999;'>⚠️ Δεν έχει φορτωθεί λογότυπο.</strong>
-        </div>
-        """, unsafe_allow_html=True)
-
 # --- Αρχεία για αποθήκευση τιμών ---
 PRICE_FILE = "material_prices.json"
 
