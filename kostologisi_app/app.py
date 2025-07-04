@@ -150,7 +150,7 @@ add_hardware = st.selectbox("Προσθήκη Εξαρτημάτων Επίπλ�
 
 st.header("3. Συρτάρια")
 drawer_count = st.number_input("Αριθμός συρταριών", min_value=0, step=1)
-drawer_price = 250
+drawer_price = 100
 
 if st.button("Προσθήκη Επίπλου"):
     section, mat = selected_material.split(" - ", 1)
